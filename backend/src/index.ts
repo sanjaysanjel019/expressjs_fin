@@ -12,6 +12,7 @@ import connctDatabase from "./config/database.config";
 import authRoutes from "./routes/auth.route";
 import { passportAuthenticateJwt } from "./config/passport.config";
 import userRoutes from "./routes/user.routes";
+import transactionRoutes from "./routes/transaction.route";
 
 
 const app = express();
@@ -41,8 +42,9 @@ app.get(
 
 app.use(`${BASE_PATH}/auth`, authRoutes);
 app.use(`${BASE_PATH}/user`, passportAuthenticateJwt, userRoutes);
+app.use(`${BASE_PATH}/transaction`, passportAuthenticateJwt, transactionRoutes);
 
-
+ 
 app.use(errorHandler);
 
 app.listen(Env.PORT, async () => {

@@ -6,6 +6,11 @@ export enum TransactionTypeEnum {
   EXPENSE = "EXPENSE",
 }
 
+export enum RecurringStatusTypeEnum {
+  RECURRING = "RECURRING",
+  NON_RECURRING = "NON_RECURRING",
+}
+
 export enum RecurringIntervalEnum {
   DAILY = "DAILY",
   WEEKLY = "WEEKLY",
