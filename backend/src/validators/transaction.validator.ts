@@ -31,8 +31,25 @@ export const baseTransactionSchema = z.object({
     ]).default(PaymentMethodEnum.CASH),
 });
 
+export const bulkDeleteTransactionSchema = z.object({
+    transactionIds:z.array(z.string().length(24,"invalid transactionID format")).min(1,"At least 1 TransactionID must be provided")
+});
+
+export const bulkTransactionSchema = z.object({
+    transactions : z.array(baseTransactionSchema).max(200,"Cannot add more that 200 transactions")
+    .refine(
+        (txs)=>txs.every((tx) =>{
+            const amount = Number(tx.amount);
+            return !isNaN(amount) && amount>0 && amount <=1_000_000; 
+        }),{
+            message:"Amount must be a positive number"
+        }
+    ),
+});
+
 export const createTransactionSchema = baseTransactionSchema;
 export const updateTransactionSchema = baseTransactionSchema.partial();
 
 export type CreateTransactionType = z.infer<typeof createTransactionSchema>;
 export type UpdateTransactionType = z.infer<typeof updateTransactionSchema>;
+export type BulkDeleteTransactionType = z.infer<typeof bulkDeleteTransactionSchema>;

@@ -4,7 +4,8 @@ import TransactionModel, {
 } from "../models/transaction.model";
 import { NotFoundException } from "../utils/app-error";
 import { calculateNextOccurrence } from "../utils/helper";
-import { CreateTransactionType, UpdateTransactionType } from "../validators/transaction.validator";
+import { BulkDeleteTransactionType, CreateTransactionType, UpdateTransactionType } from "../validators/transaction.validator";
+import { HTTPSTATUS } from "../config/http.config";
 
 export const createTransactionService = async (
   body: CreateTransactionType,
@@ -190,4 +191,73 @@ export const updateTransactionService = async (
 
   return existingTransaction;
 
+}
+
+export const deleteTransactionService = async (
+  userId: string,
+  transactionId: string
+) => {
+  const deleted = await TransactionModel.findByIdAndDelete({
+    _id: transactionId,
+    userId,
+  });
+  if (!deleted) throw new NotFoundException("Transaction not found");
+
+  return;
+};
+
+export const bulkDeleteTransactionService = async (
+  userId: string,
+  transactionIds: string[]
+) => {
+  const result = await TransactionModel.deleteMany({
+    _id:{$in:transactionIds},
+    userId,
+  });
+
+  if(result.deletedCount == 0){
+    throw new NotFoundException("No  transactions found");
+  }
+
+  return {
+    success:true,
+    deletedCount:result.deletedCount,
+  }
+
+  
+}
+
+
+export const bulkTransactionService = async(
+  userId:string,
+  transactions:CreateTransactionType[]
+) => {
+  try{
+    const bulkOps = transactions.map((trns)=>({
+      insertOne :{
+        document:{
+          ...trns,
+          userId,
+          isRecurring:false,
+          nextRecurringDate:null,
+          recurringInterval:null,
+          lastProcessedDate:null,
+          createdAt:new Date(),
+          updatedAt:new Date(),
+        }
+      }
+    }))
+
+const result = await TransactionModel.bulkWrite(bulkOps,{
+  ordered:true // <-- This will throw an error if any of the operations fail
+})
+
+return {
+  insertedCount:result.insertedCount,
+  success:true,
+}
+
+  }catch(error){
+   throw error;
+  }
 }
