@@ -1,6 +1,8 @@
 import {z} from "zod";
 import { PaymentMethodEnum, RecurringIntervalEnum, TransactionTypeEnum } from "../models/transaction.model";
 
+export const transactionIdSchema = z.string().trim().min(1);
+
 export const baseTransactionSchema = z.object({
     title:z.string().min(1,'Title is required'),
     type:z.enum([TransactionTypeEnum.INCOME,TransactionTypeEnum.EXPENSE], {
@@ -8,6 +10,7 @@ export const baseTransactionSchema = z.object({
             message:"Transaction type must either be INCOME or EXPENSE"
         }),
     }),
+    description:z.string().optional(),
     amount:z.number().positive().min(1,'Amount is required and must be positive'),
     category:z.string().min(1,'Category is required'),
     date:z.union([z.string().datetime({message:"Invalid date string"}), z.date()]).transform((val)=>new Date(val)),
