@@ -44,6 +44,15 @@ export const errorHandler: ErrorRequestHandler = (
   if (error instanceof ZodError) {
     return formatZodError(res, error);
   }
+  if (error instanceof MulterError) {
+    const { status, message, error: err } = handleMulterError(error);
+    return res.status(status).json({
+      message,
+      error: err,
+      errorCode: ErrorCodeEnum.FILE_UPLOAD_ERROR,
+    });
+  }
+  
 
   if (error instanceof MulterError) {
     const { status, message, error: err } = handleMulterError(error);
