@@ -52,7 +52,6 @@ export const errorHandler: ErrorRequestHandler = (
       errorCode: ErrorCodeEnum.FILE_UPLOAD_ERROR,
     });
   }
-  
 
   if (error instanceof MulterError) {
     const { status, message, error: err } = handleMulterError(error);

@@ -2,11 +2,15 @@ import { title } from "process";
 import TransactionModel, {
   TransactionTypeEnum,
 } from "../models/transaction.model";
-import { NotFoundException } from "../utils/app-error";
+import { BadRequestException, NotFoundException } from "../utils/app-error";
 import { calculateNextOccurrence } from "../utils/helper";
 import { BulkDeleteTransactionType, CreateTransactionType, UpdateTransactionType } from "../validators/transaction.validator";
 import { HTTPSTATUS } from "../config/http.config";
-
+import axios, { Axios } from "axios";
+import { genAI, genAIModel } from "../config/google-ai.config";
+import { createPartFromBase64, createUserContent } from "@google/genai";
+import { receiptPrompt } from "../utils/prompt";
+import { error } from "console";
 export const createTransactionService = async (
   body: CreateTransactionType,
   userId: string
@@ -259,5 +263,85 @@ return {
 
   }catch(error){
    throw error;
+  }
+}
+
+export const scanReceiptsService = async(
+  file:Express.Multer.File | undefined,
+) => {
+  //TODO: Implement receipt scanning logic
+  if(!file){
+    throw new BadRequestException("No file uploaded");
+  }
+
+  try {
+
+    if (!file.path) {
+      throw new BadRequestException("File path is missing");
+    }
+
+    const responseData = await axios.get(file?.path, {
+      responseType: "arraybuffer",
+    });
+    const base64Image = Buffer.from(responseData.data).toString("base64");
+
+    if(!base64Image){
+      throw new BadRequestException("Image is not base64 encoded");
+    }
+
+    const result = await genAI.models.generateContent({
+      model:genAIModel,
+      contents: [
+        createUserContent([
+          receiptPrompt,
+          createPartFromBase64(base64Image, file.mimetype),
+        ])
+      ],
+      config:{
+        temperature:0,
+        topP:1,
+        responseMimeType:"application/json"
+      }
+    })
+
+    const response = result.text;
+    const cleanedText = response?.replace(/```(?:json)?\n?/g, "").trim();
+
+    if(!cleanedText){
+      return {
+        error:"Could not read receipt content"
+      }
+    }
+
+    const data = JSON.parse(cleanedText);
+    if(!data?.amount || !data.date){
+      return {
+        error:"Receipt missing required information"
+      }
+    }
+
+    return {
+      title:data.title || "Receipt",
+      amount:data.amount,
+      date:data.date,
+      description:data.description,
+      category:data.category ,
+      type:data.type, 
+      paymentMethod:data.paymentMethod ,
+      receiptUrl:file.path
+    }
+
+
+
+  } catch (error) {
+    return {
+      error:"Receipt Scanning Service currently unavailable"
+    }
+  }
+
+
+  return {
+    success:true,
+    message:"Receipt scanned successfully",
   }
 }
