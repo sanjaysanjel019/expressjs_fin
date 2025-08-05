@@ -19,7 +19,7 @@ const scheduleCronJob = (name:string, time:string, job:Function) => {
 
 export const startJobs = () =>{
     return [
-        scheduleCronJob("Test Transaction", "*/1 * * * *", processRecurringTransactions),
+        scheduleCronJob("Recurring CRON Transaction", "0 5 * * *", processRecurringTransactions),
     ]
 
 }
