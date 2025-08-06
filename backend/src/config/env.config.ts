@@ -23,6 +23,8 @@ const envConfig = () => ({
   RESEND_MAILER_SENDER: getEnv("RESEND_MAILER_SENDER", ""),
 
   FRONTEND_ORIGIN: getEnv("FRONTEND_ORIGIN", "localhost"),
+  HUBSPOT_TOKEN: getEnv("HUBSPOT_API_KEY"),
+  WEBHOOK_SECRET: getEnv("WEBHOOK_SECRET"),
 });
 
 export const Env = envConfig();

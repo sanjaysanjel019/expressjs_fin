@@ -12,24 +12,24 @@ export const registerController = asyncHandler(
 
     return res
       .status(HTTPSTATUS.CREATED)
-      .json({ message: "User registered successfully",
-        data:result
-       });
+      .json({ message: "User registered successfully", data: result });
   }
 );
 
-export const loginController = asyncHandler(async (req: Request, res: Response) => {
+export const loginController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const body = loginSchema.parse({ ...req.body });
+    const { user, accessToken, expiresAt, reportSetting } =
+      await loginService(body);
 
-  const body = loginSchema.parse({ ...req.body});
-  const {user,accessToken,expiresAt,reportSetting} = await loginService(body);
-
-
-  return res
-    .status(HTTPSTATUS.OK)
-    .json({ message: "User logged in successfully",
-      user,
-      accessToken,
-      expiresAt,
-      reportSetting
-     });
-});
+    return res
+      .status(HTTPSTATUS.OK)
+      .json({
+        message: "User logged in successfully",
+        user,
+        accessToken,
+        expiresAt,
+        reportSetting,
+      });
+  }
+);

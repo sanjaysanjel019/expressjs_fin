@@ -15,6 +15,7 @@ import userRoutes from "./routes/user.routes";
 import transactionRoutes from "./routes/transaction.route";
 import { initializeCrons } from "./crons";
 import reportRoute from "./routes/report.route";
+import hubSpotRoute from "./routes/hubspot.route";
 
 const app = express();
 const BASE_PATH = Env.BASE_PATH;
@@ -41,13 +42,17 @@ app.get(
   })
 );
 
+// Application Routes
 app.use(`${BASE_PATH}/auth`, authRoutes);
 app.use(`${BASE_PATH}/user`, passportAuthenticateJwt, userRoutes);
 app.use(`${BASE_PATH}/transaction`, passportAuthenticateJwt, transactionRoutes);
 app.use(`${BASE_PATH}/report`, passportAuthenticateJwt, reportRoute);
+app.use(`${BASE_PATH}/`, hubSpotRoute);
 
+// Enabling the application to use the custom Error Handler
 app.use(errorHandler);
 
+// Starting the application - connect to DB and CRON job initialization
 app.listen(Env.PORT, async () => {
   await connctDatabase();
 
