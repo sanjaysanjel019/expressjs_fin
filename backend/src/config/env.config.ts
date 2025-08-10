@@ -20,11 +20,12 @@ const envConfig = () => ({
   CLOUDINARY_API_SECRET: getEnv("CLOUDINARY_API_SECRET"),
 
   RESEND_API_KEY: getEnv("RESEND_API_KEY"),
-  RESEND_MAILER_SENDER: getEnv("RESEND_MAILER_SENDER", ""),
+  RESEND_EMAIL_SENDER: getEnv("RESEND_EMAIL_SENDER"),
 
   FRONTEND_ORIGIN: getEnv("FRONTEND_ORIGIN", "localhost"),
   HUBSPOT_TOKEN: getEnv("HUBSPOT_API_KEY"),
   WEBHOOK_SECRET: getEnv("WEBHOOK_SECRET"),
+
 });
 
 export const Env = envConfig();

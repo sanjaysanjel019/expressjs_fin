@@ -94,3 +94,4 @@ export async function generateAIInsights({
     return [];
   }
 }
+

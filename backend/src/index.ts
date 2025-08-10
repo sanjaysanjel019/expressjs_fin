@@ -42,6 +42,7 @@ app.get(
   })
 );
 
+
 // Application Routes
 app.use(`${BASE_PATH}/auth`, authRoutes);
 app.use(`${BASE_PATH}/user`, passportAuthenticateJwt, userRoutes);

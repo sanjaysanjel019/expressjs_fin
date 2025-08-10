@@ -42,10 +42,11 @@ export const generateReportController = asyncHandler(async(req:Request, res:Resp
     const toDate = new Date (to as string);
     const body = updateReportSettingSchema.parse(req.body);
 
-    await generateUserReportService(userId,fromDate,toDate);
+    const result =await generateUserReportService(userId,fromDate,toDate);
 
     return res.status(HTTPSTATUS.OK).json({
-        message:"Report Setting Updated Successfully",
+        message:"Report Generated Successfully with AI Insights ✨✨",
+        ...result
     });
 
 });

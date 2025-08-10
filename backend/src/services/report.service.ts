@@ -88,6 +88,8 @@ export const generateUserReportService = async (
   toDate: Date
 ) => {
   const result = await TransactionModel.aggregate([
+    
+    // First mongo aggregation stage
     {
       $match: {
         userId: new mongoose.Types.ObjectId(userId),
@@ -126,7 +128,7 @@ export const generateUserReportService = async (
         ],
         categories: [
           {
-            $match: { $type: TransactionTypeEnum.EXPENSE },
+            $match: { type: TransactionTypeEnum.EXPENSE },
           },
           {
             $group: {
@@ -145,8 +147,8 @@ export const generateUserReportService = async (
     },
     {
       $project: {
-        totalIncome: { $arrayElemtAt: ["$summary.totalIncome", 0] },
-        totalExpenses: { $arrayElemtAt: ["$summary.totalExpenses", 0] },
+        totalIncome: { $arrayElemAt: ["$summary.totalIncome", 0] },
+        totalExpenses: { $arrayElemAt: ["$summary.totalExpenses", 0] },
         categories: 1,
       },
     },
@@ -169,7 +171,7 @@ export const generateUserReportService = async (
       acc[_id] = {
         amount: convertToDollarsUnit(total),
         percentage:
-          totalExpenses > 0 ? Math.round(total / totalExpenses) * 100 : 0,
+          totalExpenses > 0 ? Math.round((total / totalExpenses) * 100) : 0,
       };
       return acc;
     },
@@ -181,7 +183,7 @@ export const generateUserReportService = async (
 
   const periodLabel = `${format(fromDate, "MMMM d")} - ${format(toDate, "d, yyyy")}`;
 
-  const insights = generateAIInsights({
+  const insights = await generateAIInsights({
     totalIncome,
     totalExpenses,
     availableBalance,
@@ -189,7 +191,7 @@ export const generateUserReportService = async (
     categories: byCategory,
     periodLabel: periodLabel,
   });
-
+console.log("❌Insihghts❌",insights);
   return {
     period: periodLabel,
     summary: {

@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../middlewares/asyncHandler.middleware";
-import { findByIdUserService } from "../services/user.service";
+import { findByIdUserService, updateUserService } from "../services/user.service";
 import { HTTPSTATUS } from "../config/http.config";
+import { updateUserSchema } from "../validators/user.validator";
 
 export const getCurrentUserController = asyncHandler(
   async (req: Request, res: Response) => {
-    console.log("❣️❣️❣️")
     const userId = req.user?._id;
     const user = await findByIdUserService(userId);
 
@@ -19,10 +19,24 @@ export const getCurrentUserController = asyncHandler(
 
 export const getGenericUserController = asyncHandler(
     async (req: Request, res: Response) => {
-      console.log("❣️I ❣️LOVE❣️YOU!")
       return res.status(HTTPSTATUS.OK).json({
         message: "You successfully get generic user",
       })
   
+    }
+  );
+
+  export const updateUserSettingController = asyncHandler(
+    async (req: Request, res: Response) => {
+      const body = updateUserSchema.parse(req.body);
+      const userId = req.user?._id;
+
+      const profilePicture = req.file;
+      const updatedUser = await updateUserService(userId, body, profilePicture);
+
+      return res.status(HTTPSTATUS.OK).json({
+        message: "User Profile updated successfully",
+        data: updatedUser
+      });
     }
   );
