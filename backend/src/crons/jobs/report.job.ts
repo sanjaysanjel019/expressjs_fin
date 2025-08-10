@@ -19,13 +19,8 @@ export const processReportJob = async () => {
   let processedCount = 0;
   let failedCount = 0;
 
-//   const fromDate = startOfMonth(subMonths(now, 1));
-//   const toDate = endOfMonth(subMonths(now, 1));
-
-//   let fromDate = "2025-08-03T18:15:00.000+00:00";
-//   let toDate = "2025-08-10T18:15:00.000+00:00";
-  let fromDate = new Date("2025-08-03T18:15:00.000+00:00");
-  let toDate = new Date("2025-08-10T18:15:00.000+00:00");
+  const fromDate = startOfMonth(subMonths(now, 1));
+  const toDate = endOfMonth(subMonths(now, 1));
 
   try {
     const reportSettingCursor = ReportSettingModel.find({
