@@ -16,6 +16,8 @@ import transactionRoutes from "./routes/transaction.route";
 import { initializeCrons } from "./crons";
 import reportRoute from "./routes/report.route";
 import hubSpotRoute from "./routes/hubspot.route";
+import analyticsRoutes from "./routes/analytics.route";
+import { subDays } from "date-fns";
 
 const app = express();
 const BASE_PATH = Env.BASE_PATH;
@@ -24,6 +26,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(passport.initialize());
+
+// const now = new Date();
+// console.log("Now is --->"+now);
+
+// const yesterday = subDays(now.setHours(0, 0, 0, 0), 1);
+// console.log("Yesterday is --->"+yesterday);
 
 app.use(
   cors({
@@ -49,6 +57,7 @@ app.use(`${BASE_PATH}/user`, passportAuthenticateJwt, userRoutes);
 app.use(`${BASE_PATH}/transaction`, passportAuthenticateJwt, transactionRoutes);
 app.use(`${BASE_PATH}/report`, passportAuthenticateJwt, reportRoute);
 app.use(`${BASE_PATH}/`, hubSpotRoute);
+app.use(`${BASE_PATH}/analytics`, passportAuthenticateJwt,analyticsRoutes);
 
 // Enabling the application to use the custom Error Handler
 app.use(errorHandler);
