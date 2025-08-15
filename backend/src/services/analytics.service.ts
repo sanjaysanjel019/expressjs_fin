@@ -252,6 +252,114 @@ import { convertToDollarsUnit } from "../utils/format-currency";
 // };
 
 
+export const chartAnalyticsService = async (
+  userId: string,
+  dateRangePreset?: DateRangeEnumPreset,
+  customFrom?: Date,
+  customTo?: Date
+) => {
+
+  const range = getDateRange(dateRangePreset, customFrom, customTo);
+
+  const { from, to, value: rangeValue } = range;
+  const filter :any = {
+    userId: new mongoose.Types.ObjectId(userId),
+    ...(from && to && {
+      date:{
+        $gte:from,
+        $lte:to
+      }
+    })
+  }
+
+  const result = await TransactionModel.aggregate([
+    {$match:filter},
+    // Group the transaction by date (yyyy-mm-dd)
+    {
+      $group:{
+        _id:{
+          $dateToString:{
+            format:"%Y-%m-%d",
+            date:"$date"
+          }
+        },
+        income : {
+          $sum:{
+            $cond:[
+              {$eq:["$type",TransactionTypeEnum.INCOME]},
+              {$abs:"$amount"},0
+            ]
+          }
+        },
+        expenses : {
+          $sum:{
+            $cond:[
+              {$eq:["$type",TransactionTypeEnum.EXPENSE]},
+              {$abs:"$amount"},0
+            ]
+          }
+        },
+        incomeCount:{
+          $sum:{
+            $cond:[
+              {$eq:["$type",TransactionTypeEnum.INCOME]},1,0
+            ]
+          }
+        },
+        expensesCount:{
+          $sum:{
+            $cond:[
+              {$eq:["$type",TransactionTypeEnum.EXPENSE]},1,0
+            ]
+          }
+        }
+      }
+    },{
+      $sort:{ _id:1}
+    },
+    {
+      $project:{
+        _id:0,
+        date:"$_id",
+        income:1,
+        expenses:1,
+        incomeCount:1,
+        expensesCount:1,
+      }
+    },
+    {
+      $group:{
+        _id:null,
+        chartData:{
+          $push:"$$ROOT"
+        },
+        totalIncomeCount:{$sum:"$incomeCount"},
+        totalExpensesCount:{$sum:"$expensesCount"}
+      }
+    },{
+      $project:{
+        _id:0,
+        chartData:1,
+        totalIncomeCount:1,
+        totalExpensesCount:1
+      }
+    }
+  ]);
+
+  const transformedData = (result[0]?.chartData || []).map((item:any)=>({
+    date:item.date,
+    income:convertToDollarsUnit(item.income),
+    expenses:convertToDollarsUnit(item.expenses),
+  }));
+
+  return {
+    chartData:transformedData,
+    totalIncomeCount:result[0]?.totalIncomeCount || {},
+    totalExpensesCount:result[0]?.totalExpensesCount || {},
+  }
+
+}
+
 export const summaryAnalyticsService = async (
   userId: string,
   dateRangePreset?: DateRangeEnumPreset,
@@ -262,12 +370,7 @@ export const summaryAnalyticsService = async (
 
   const { from, to, value: rangeValue } = range;
 
-  const userTransactionCount = await TransactionModel.countDocuments({
-    userId: new mongoose.Types.ObjectId(userId)
-  });
-  console.log('User transaction count:', userTransactionCount,'for userID:', userId);
   
-
   const currentPeriodPipeline: PipelineStage[] = [
     {
       $match: {
