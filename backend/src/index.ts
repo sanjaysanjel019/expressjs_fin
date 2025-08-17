@@ -63,11 +63,22 @@ app.use(`${BASE_PATH}/analytics`, passportAuthenticateJwt,analyticsRoutes);
 app.use(errorHandler);
 
 // Starting the application - connect to DB and CRON job initialization
-app.listen(Env.PORT, async () => {
+const server = app.listen(Env.PORT, async () => {
   await connctDatabase();
 
   if (Env.NODE_ENV === "development") {
     await initializeCrons();
   }
   console.log(`Server is running on port ${Env.PORT} in ${Env.NODE_ENV} mode`);
+
+  
+});
+
+process.on("unhandledRejection", (err:any) => {
+  console.log("UNHANDLED REJECTION! 💥 Shutting down...");
+  console.log(err.name, err.message);
+  server.close(()=>{
+    process.exit(1);
+
+  })
 });
