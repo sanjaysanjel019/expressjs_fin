@@ -17,7 +17,9 @@ import { initializeCrons } from "./crons";
 import reportRoute from "./routes/report.route";
 import hubSpotRoute from "./routes/hubspot.route";
 import analyticsRoutes from "./routes/analytics.route";
-import { subDays } from "date-fns";
+import { setupSwagger } from "./swagger";
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsDoc = require('swagger-jsdoc');
 
 const app = express();
 const BASE_PATH = Env.BASE_PATH;
@@ -62,12 +64,30 @@ app.use(`${BASE_PATH}/analytics`, passportAuthenticateJwt,analyticsRoutes);
 // Enabling the application to use the custom Error Handler
 app.use(errorHandler);
 
+// Using Swagger Docs
+const swaggerOptions = {
+  swaggerDefinition: {
+    info: {
+      title: "API Documentation",
+      version: "1.0.0",
+      description: "API Documentation",
+    },
+    basePath: BASE_PATH,
+  },
+  apis: [`${__dirname}/routes/*.ts`],
+}
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+
 // Starting the application - connect to DB and CRON job initialization
 const server = app.listen(Env.PORT, async () => {
   await connctDatabase();
 
   if (Env.NODE_ENV === "development") {
     await initializeCrons();
+    setupSwagger(app)
   }
   console.log(`Server is running on port ${Env.PORT} in ${Env.NODE_ENV} mode`);
 

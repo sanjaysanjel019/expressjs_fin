@@ -1,6 +1,83 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { compareValue, hashValue } from "../utils/bcrypt";
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - email
+ *         - name
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: The auto-generated id of the user
+ *           example: 60d0fe4f5311236168a109ca
+ *         name:
+ *           type: string
+ *           description: The user's full name
+ *           example: John Doe
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: The user's email address
+ *           example: john.doe@example.com
+ *         age:
+ *           type: number
+ *           description: The user's age
+ *           minimum: 0
+ *           maximum: 150
+ *           example: 30
+ *         isActive:
+ *           type: boolean
+ *           description: Whether the user is active
+ *           default: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: User creation timestamp
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: User last update timestamp
+ *     UserInput:
+ *       type: object
+ *       required:
+ *         - email
+ *         - name
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: The user's full name
+ *           example: John Doe
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: The user's email address
+ *           example: john.doe@example.com
+ *         age:
+ *           type: number
+ *           description: The user's age
+ *           minimum: 0
+ *           maximum: 150
+ *           example: 30
+ *     ApiError:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: false
+ *         message:
+ *           type: string
+ *           example: Error message
+ *         errors:
+ *           type: array
+ *           items:
+ *             type: object
+ */
+
 export interface UserDocument extends Document {
   name: string;
   email: string;

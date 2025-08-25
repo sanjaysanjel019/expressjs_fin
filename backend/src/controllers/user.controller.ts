@@ -26,7 +26,7 @@ export const getGenericUserController = asyncHandler(
     }
   );
 
-  export const updateUserSettingController = asyncHandler(
+export const updateUserSettingController = asyncHandler(
     async (req: Request, res: Response) => {
       const body = updateUserSchema.parse(req.body);
       const userId = req.user?._id;
